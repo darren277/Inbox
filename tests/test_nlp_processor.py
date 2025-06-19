@@ -83,7 +83,7 @@ def mock_kafka_consumer(mocker):
     mock_consumer_instance.__iter__.return_value = iter([]) # Default to no messages
 
     # Patch the KafkaConsumer class itself directly in the nlp_processor module's namespace
-    mocker.patch('nlp_processor.KafkaConsumer', return_value=mock_consumer_instance)
+    mocker.patch('src.nlp_processing.KafkaConsumer', return_value=mock_consumer_instance)
     mock_consumer_instance.MockMessage = MockMessage
     yield mock_consumer_instance # Yield the instance directly
 
@@ -98,10 +98,10 @@ def mock_surrealdb_client(mocker):
     mock_db_instance.connect.return_value = None
     mock_db_instance.signin.return_value = None
     # Patch the constants used in get_surrealdb_client to match the mock
-    mocker.patch('nlp_processor.SURREALDB_USER', 'mock_user')
-    mocker.patch('nlp_processor.SURREALDB_PASS', 'mock_pass')
-    mocker.patch('nlp_processor.SURREALDB_NAMESPACE', 'mock_namespace')
-    mocker.patch('nlp_processor.SURREALDB_DB', 'mock_db_name')
+    mocker.patch('src.nlp_processing.SURREALDB_USER', 'mock_user')
+    mocker.patch('src.nlp_processing.SURREALDB_PASS', 'mock_pass')
+    mocker.patch('src.nlp_processing.SURREALDB_NAMESPACE', 'mock_namespace')
+    mocker.patch('src.nlp_processing.SURREALDB_DB', 'mock_db_name')
 
     mock_db_instance.use.return_value = None
     mock_db_instance.query.return_value = [{"status": "OK", "result": {"id": "comm:1", "content": "mock"}}]
