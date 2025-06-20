@@ -9,6 +9,7 @@ import re
 import logging
 from kafka import KafkaConsumer
 from transformers import pipeline
+from surrealdb import Surreal
 
 from settings import (
     KAFKA_BOOTSTRAP_SERVERS, KAFKA_TOPIC, SPACY_MODEL, STOP_WORDS, NUM_TOPICS,
@@ -223,7 +224,7 @@ async def process_communications_stream():
         if timestamp_str and message_topics:
             message_date = datetime.fromisoformat(timestamp_str).strftime('%Y-%m-%d')
             for topic_info in message_topics:
-                topic_id = int(topic_info['id'])
+                topic_id = int(topic_info[0])
                 topic_over_time[topic_id][message_date] += 1
 
         # 4. Store in SurrealDB
