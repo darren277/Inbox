@@ -1,0 +1,51 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: Kafka
+metadata:
+  name: kafka-broker
+  namespace: {{ .Values.namespace }}
+spec:
+  kafka:
+    version: 3.7.0
+    replicas: {{ .Values.kafka.replicas | default 3 }}
+    listeners:
+      - name: plain
+        port: 9092
+        type: internal
+        tls: false
+      - name: external
+        port: 9094
+        type: nodeport # Or loadbalancer if in cloud, for external access
+        tls: false
+        configuration:
+          # If using NodePort and you need specific nodes:
+          # brokerRack: ${kubernetes.io/hostname}
+          # Prefer NodePort for simple local testing or when a LoadBalancer isn't desired/available.
+          # For production on cloud, 'loadbalancer' is common.
+          # If 'loadbalancer', uncomment below:
+          # loadBalancer:
+          #   class: my-lb-class # Optional, if you have specific LB classes
+          #   sourceRanges: ["0.0.0.0/0"] # Restrict if possible
+    config: # Kafka broker configurations
+      offsets.topic.replication.factor: {{ .Values.kafka.replicas | default 3 }}
+      transaction.state.log.replication.factor: {{ .Values.kafka.replicas | default 3 }}
+      log.retention.hours: 168 # 7 days
+      log.segment.bytes: 1073741824 # 1GB
+      num.partitions: 1 # Default, can be overridden per topic
+    storage:
+      type: jbod # Just a bunch of disks
+      volumes:
+        - id: 0
+          type: persistent-claim
+          size: 100Gi # Adjust size as needed
+          deleteClaim: false # Set to true to delete PVCs on cluster deletion
+          class: standard # Or your specific StorageClass (e.g., gp2, azure-disk)
+  zookeeper:
+    replicas: {{ .Values.kafka.replicas | default 3 }}
+    storage:
+      type: persistent-claim
+      size: 10Gi # Adjust size as needed
+      deleteClaim: false
+      class: standard # Or your specific StorageClass
+  entityOperator: # For managing topics and users
+    topicOperator: {}
+    userOperator: {}
