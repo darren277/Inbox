@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingest-communications
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.namespace }}
+    component: ingest-communications
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.namespace }}
+      component: ingest-communications
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.namespace }}
+        component: ingest-communications
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        prometheus.io/port: "5000"
+    spec:
+      imagePullSecrets:
+        - name: ecr-secret
+      containers:
+      - name: ingest-communications
+        image: "{{ .Values.ingest.communications.image.repository }}:{{ .Values.ingest.communications.image.tag }}"
+        imagePullPolicy: "{{ .Values.ingest.communications.image.pullPolicy }}"
+        env:
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: "{{ .Values.kafka.brokerName }}-kafka-bootstrap:9092"
+        - name: KAFKA_TOPIC
+          value: {{ .Values.kafka.topic }}
+        # TODO: Define resource requests and limits.
+        # Starting low and increasing as we observe resource usage.
+        # TODO: Create some relevant dashboards in Grafana.
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        # Liveness and Readiness probes (important for healthy deployments)
+        # For a producer, a simple HTTP probe might not apply.
+        # You'd need a custom script to check if Kafka connection is alive.
+        # Or just rely on crash loops.
+        # If your data ingestion has a health endpoint (e.g., /healthz), use it.
+        # Otherwise, Kubernetes just checks if the process is running.
+        # readinessProbe:
+        #   exec:
+        #     command: ["sh", "-c", "nc -z my-kafka-cluster-kafka-brokers 9092"] # Basic Kafka connection check
+        #   initialDelaySeconds: 10
+        #   periodSeconds: 5
+        # livenessProbe:
+        #   exec:
+        #     command: ["sh", "-c", "nc -z my-kafka-cluster-kafka-brokers 9092"]
+        #   initialDelaySeconds: 60
+        #   periodSeconds: 10
+      # If you need to mount text/audio data from Persistent Volume (advanced for this use case)
+      # volumes:
+      #   - name: text-data-volume
+      #     persistentVolumeClaim:
+      #       claimName: text-data-pvc
+      #   - name: audio-data-volume
+      #     persistentVolumeClaim:
+      #       claimName: audio-data-pvc
+      # volumeMounts:
+      #   - name: text-data-volume
+      #     mountPath: /app/text_data
+      #   - name: audio-data-volume
+      #     mountPath: /app/audio_data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingest-communications-service
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.namespace }}
+    component: ingest-communications
+spec:
+  selector:
+    app: {{ .Values.namespace }}
+    component: ingest-communications
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP
+
