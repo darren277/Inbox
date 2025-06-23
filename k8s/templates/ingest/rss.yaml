@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingest-rss
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.namespace }}
+    component: ingest-rss
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.namespace }}
+      component: ingest-rss
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.namespace }}
+        component: ingest-rss
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        prometheus.io/port: "5000"
+    spec:
+      imagePullSecrets:
+        - name: ecr-secret
+      containers:
+      - name: ingest-rss
+        image: "{{ .Values.ingest.rss.image.repository }}:{{ .Values.ingest.rss.image.tag }}"
+        imagePullPolicy: "{{ .Values.ingest.rss.image.pullPolicy }}"
+        env:
+        - name: KAFKA_BOOTSTRAP_SERVERS
+          value: "{{ .Values.kafka.brokerName }}-kafka-bootstrap:9092"
+        - name: KAFKA_TOPIC
+          value: {{ .Values.kafka.topic }}
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        # Liveness and Readiness probes (important for healthy deployments)
+        # For a producer, a simple HTTP probe might not apply.
+        # You'd need a custom script to check if Kafka connection is alive.
+        # Or just rely on crash loops.
+        # If your data ingestion has a health endpoint (e.g., /healthz), use it.
+        # Otherwise, Kubernetes just checks if the process is running.
+        # readinessProbe:
+        #   exec:
+        #     command: ["sh", "-c", "nc -z my-kafka-cluster-kafka-brokers 9092"] # Basic Kafka connection check
+        #   initialDelaySeconds: 10
+        #   periodSeconds: 5
+        # livenessProbe:
+        #   exec:
+        #     command: ["sh", "-c", "nc -z my-kafka-cluster-kafka-brokers 9092"]
+        #   initialDelaySeconds: 60
+        #   periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingest-rss-service
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.namespace }}
+    component: ingest-rss
+spec:
+  selector:
+    app: {{ .Values.namespace }}
+    component: ingest-rss
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP
