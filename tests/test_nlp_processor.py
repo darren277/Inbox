@@ -4,7 +4,7 @@ from datetime import datetime
 import logging
 import re
 
-import src.nlp_processing as nlp_processor
+import lib.process.process as nlp_processor
 
 # Ensure logging is captured by pytest
 @pytest.fixture(autouse=True)
