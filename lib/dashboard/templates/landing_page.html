@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inbox: Communications Monitoring for Everyone</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Main style overrides -->
+    <style>
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.8em;
+        }
+        header p {
+            font-size: 1.2em;
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+        nav {
+            margin-top: 15px;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+        nav a:hover {
+            color: #d1ecf1;
+        }
+        .hero {
+            background: linear-gradient(to right, #2c3e50, #4ca1af); /* Darker, professional gradient */
+            color: white;
+            text-align: center;
+            padding: 80px 20px;
+            margin-bottom: 30px;
+        }
+        .hero h2 {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            color: white;
+        }
+        .hero p {
+            font-size: 1.5em;
+            max-width: 800px;
+            margin: 0 auto 40px auto;
+            opacity: 0.9;
+        }
+        .cta-button {
+            display: inline-block;
+            background-color: #28a745;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 1.3em;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .cta-button:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+        .features {
+            padding: 40px 20px;
+            background-color: #f8f9fa;
+        }
+        .features h2 {
+            font-size: 2.2em;
+            margin-bottom: 40px;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        .feature-item {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .feature-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        }
+        .feature-item h3 {
+            color: #007bff;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+        .feature-item p {
+            font-size: 1em;
+            color: #555;
+        }
+        footer {
+            background-color: #343a40;
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 50px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Inbox</h1>
+            <p>Communications Monitoring for Everyone</p>
+            <nav>
+                <a href="#overview">Overview</a>
+                <a href="#features">Features</a>
+                <a href="/dashboard">Live Dashboard</a>
+                </nav>
+        </div>
+    </header>
+
+    <section class="hero" id="overview">
+        <div class="container">
+            <h2>Keep Tabs on Incoming Information</h2>
+            <p>In today's complex information landscape, managing vast volumes of electronic communications is a challenge. Inbox leverages cutting-edge Artificial Intelligence to enable you to go from reactive to proactive.</p>
+            <a href="/dashboard" class="cta-button">Explore the Live Dashboard</a>
+        </div>
+    </section>
+
+    <section class="features" id="features">
+        <div class="container">
+            <h2>Key Features Designed for Your Success</h2>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <h3>Comprehensive Archiving</h3>
+                    <p>Securely capture and store all electronic communications – email, chat, social media, mobile, and even voice transcripts – ensuring full auditability and regulatory readiness.</p>
+                </div>
+                <div class="feature-item">
+                    <h3>Multi-Modal AI Analysis</h3>
+                    <p>Go beyond text. Our advanced AI processes text and simulated voice transcripts, understanding context and nuances for more accurate risk detection.</p>
+                </div>
+<!--                <div class="feature-item">-->
+<!--                    <h3>Automated Risk Detection</h3>-->
+<!--                    <p>Identify subtle and overt policy violations, insider threats, and market manipulation attempts in real-time, reducing false positives and empowering your compliance team.</p>-->
+<!--                </div>-->
+                <div class="feature-item">
+                    <h3>Dynamic Topic Modeling</h3>
+                    <p>Uncover hidden trends and emerging risks across vast communication datasets.</p>
+                </div>
+                <div class="feature-item">
+                    <h3>Intuitive Analytics Dashboard</h3>
+                    <p>Visualize key metrics, communication patterns, and risk alerts through a user-friendly, interactive dashboard for immediate action.</p>
+                </div>
+                <div class="feature-item">
+                    <h3>Scalable & Secure Cloud Solution</h3>
+                    <p>Built on a robust, Kubernetes-orchestrated infrastructure, ensuring high availability, data integrity, and compliance with the strictest industry standards.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Inbox. All rights reserved. | Powered by Python, Kafka, SurrealDB, and Kubernetes.</p>
+            <p>Currently located in Vancouver, British Columbia, Canada.</p>
+        </div>
+    </footer>
+</body>
+</html>
