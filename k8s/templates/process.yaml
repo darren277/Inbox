@@ -1,0 +1,116 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: process
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.namespace }}
+    component: process
+spec:
+  replicas: {{ .Values.process.replicas | default 1 }}
+  selector:
+    matchLabels:
+      app: {{ .Values.namespace }}
+      component: process
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.namespace }}
+        component: process
+    spec:
+      imagePullSecrets:
+        - name: ecr-secret
+      containers:
+        - name: process
+          image: "{{ .Values.process.image.repository }}:{{ .Values.process.image.tag }}"
+          imagePullPolicy: "{{ .Values.process.image.pullPolicy }}"
+          env:
+            - name: SURREALDB_HOST
+              value: surrealdb
+            - name: SURREALDB_PORT
+              value: "8000"
+            - name: SURREALDB_NS
+              value: "{{ .Values.surrealdb.namespace }}"
+            - name: SURREALDB_DB
+              value: "{{ .Values.surrealdb.database }}"
+            - name: SURREALDB_USER
+              valueFrom: { secretKeyRef: { name: surreal-secret, key: user } }
+            - name: SURREALDB_PASS
+              valueFrom: { secretKeyRef: { name: surreal-secret, key: pass } }
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "{{ .Values.kafka.brokerName }}:9092"
+            - name: KAFKA_TOPIC
+              value: {{ .Values.kafka.topic }}
+          resources:
+            requests:
+              memory: "1Gi" # NLP models can be memory hungry
+              cpu: "500m"
+            limits:
+              memory: "2Gi" # Set a hard limit to prevent OOMKills
+              cpu: "1000m" # 1 CPU core
+          # Liveness and Readiness probes
+          # For a consumer, this is tricky. You might need to expose a simple HTTP endpoint
+          # that reports the consumer's health (e.g., if it's actively consuming and processing).
+          # Or, a simple file-based check if the process is writing health indicators.
+          # readinessProbe:
+          #   exec:
+          #     command: ["sh", "-c", "echo 'ready' > /tmp/ready && sleep 1"] # Placeholder
+          #   initialDelaySeconds: 30 # Give time for SpaCy model loading
+          #   periodSeconds: 10
+          # livenessProbe:
+          #   exec:
+          #     command: ["sh", "-c", "pgrep -f nlp_processing.py"] # Check if main process is running
+          #   initialDelaySeconds: 60
+          #   periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: process-service
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.namespace }}
+    component: process
+spec:
+  selector:
+    app: {{ .Values.namespace }}
+    component: process
+  ports:
+    - protocol: TCP
+      port: 8081
+      targetPort: 8081
+  type: ClusterIP
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: process-hpa
+  namespace: {{ .Values.namespace }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: process
+  minReplicas: 1
+  maxReplicas: {{ .Values.process.maxReplicas | default 1 }}
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70 # Scale up if average CPU utilization exceeds 70%
+  # - type: Resource # You can also scale on memory, but be careful with OOMKills
+  #   resource:
+  #     name: memory
+  #     target:
+  #       type: Utilization
+  #       averageUtilization: 80
+  # You could also use custom metrics (e.g., Kafka consumer lag via Prometheus + adapter)
+  # - type: Pods
+  #   pods:
+  #     metric:
+  #       name: kafka_consumer_lag # Requires Prometheus & Kafka exporter
+  #     target:
+  #       type: AverageValue
+  #       averageValue: 1000m # Scale if average lag > 1000 messages
