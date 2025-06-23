@@ -1,0 +1,49 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: ingest-apicronjob
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.namespace }}
+    component: ingest-apicronjob
+spec:
+  schedule: {{ .Values.ingest.apicronjob.schedule | quote }}
+  concurrencyPolicy: Forbid # Do not allow concurrent runs of the same CronJob
+  successfulJobsHistoryLimit: 3 # Keep 3 successful completed Jobs
+  failedJobsHistoryLimit: 1 # Keep 1 failed completed Job
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: {{ .Values.namespace }}
+            component: ingest-apicronjob
+        spec:
+          restartPolicy: OnFailure # If the script fails, Kubernetes will retry it in the same Pod
+          containers:
+          - name: api-ingest-cron
+            image: "{{ .Values.ingest.apicronjob.image.repository }}:{{ .Values.ingest.apicronjob.image.tag }}"
+            imagePullPolicy: "{{ .Values.ingest.apicronjob.image.pullPolicy }}"
+            env:
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "{{ .Values.kafka.brokerName }}-kafka-bootstrap:9092"
+            - name: KAFKA_TOPIC
+              value: {{ .Values.kafka.topic }}
+            - name: EXTERNAL_API_URL
+              value: {{ .Values.ingest.apicronjob.url }}
+            - name: EXTERNAL_API_POLLING_CRON_SCHEDULE
+              value: {{ .Values.ingest.apicronjob.schedule | quote }}
+            - name: EXTERNAL_API_TIMEOUT_SECONDS
+              value: "15"
+            # - name: EXTERNAL_API_KEY # Uncomment and use K8s Secret for API key
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: api-secrets # Name of your Kubernetes Secret
+            #       key: external-api-key # Key within the Secret
+            resources:
+              requests:
+                memory: "64Mi"
+                cpu: "100m"
+              limits:
+                memory: "128Mi"
+                cpu: "200m"
