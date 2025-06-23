@@ -1,15 +1,15 @@
 """"""
-import spacy
-from nltk.corpus import stopwords
-from gensim import corpora, models
 from collections import defaultdict
 from datetime import datetime
 import json
 import re
 import logging
+from gensim import corpora, models
 from kafka import KafkaConsumer
-from transformers import pipeline
+from nltk.corpus import stopwords
+import spacy
 from surrealdb import Surreal
+from transformers import pipeline
 
 from settings import (
     KAFKA_BOOTSTRAP_SERVERS, KAFKA_TOPIC, SPACY_MODEL, STOP_WORDS, NUM_TOPICS,
