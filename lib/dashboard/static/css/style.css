@@ -1,0 +1,95 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #e9ebee;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1300px;
+    margin: 30px auto;
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+h1, h2 {
+    color: #1a73e8;
+    text-align: center;
+    margin-bottom: 25px;
+    font-weight: 600;
+}
+
+h1 {
+    font-size: 2.5em;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+h2 {
+    font-size: 1.8em;
+    margin-top: 40px;
+}
+
+.plot-container {
+    text-align: center;
+    margin-bottom: 40px;
+    background-color: #fafafa;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.plot-container img {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid #cfd8dc;
+    border-radius: 5px;
+    margin-top: 15px;
+}
+
+.message-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 25px;
+    font-size: 0.9em;
+}
+
+.message-table th, .message-table td {
+    border: 1px solid #c0c0c0;
+    padding: 12px 15px;
+    text-align: left;
+}
+
+.message-table th {
+    background-color: #3f51b5;
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.message-table tr:nth-child(even) {
+    background-color: #f7f7f7;
+}
+
+.message-table tr:hover {
+    background-color: #eef;
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
+    margin: 40px 0;
+}
+
+p {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    margin-top: 15px;
+}
