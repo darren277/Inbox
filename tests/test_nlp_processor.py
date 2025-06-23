@@ -9,7 +9,8 @@ import lib.process.process as nlp_processor
 # Ensure logging is captured by pytest
 @pytest.fixture(autouse=True)
 def caplog_fixture(caplog):
-    caplog.set_level(logging.INFO) # Adjust as needed for specific tests
+    # Adjust this as needed for specific tests
+    caplog.set_level(logging.INFO)
 
 
 # Fixture to reset global variables in the nlp_processor module between tests
@@ -46,7 +47,7 @@ def mock_nlp_model(mocker):
             mock_token.is_space = False
             mock_tokens.append(mock_token)
 
-        # Mock the __iter__ method to allow iteration over tokens
+        # Mock the `__iter__` method to allow iteration over tokens
         mock_doc.__iter__.return_value = iter(mock_tokens)
         return mock_doc
 
@@ -66,8 +67,7 @@ def mock_sentiment_analyzer(mocker):
     # Patch the 'sentiment_analyzer' global variable in nlp_processor to be our mock pipeline.
     mocker.patch.object(nlp_processor, 'sentiment_analyzer', new=mock_pipeline_instance)
 
-    # Patch the analyze_sentiment *function* itself.
-    # This is crucial to be able to assert .call_count on it.
+    # Patch the analyze_sentiment *function* itself to be able to assert `.call_count` on it.
     # We configure its side_effect to call the *original* function's implementation
     # using our mocked `sentiment_analyzer` (pipeline). This allows the actual logic
     # within `analyze_sentiment` to run, while still making the function a mock.
@@ -110,7 +110,7 @@ def mock_surrealdb_client(mocker):
 
     mock_db_instance.connect.return_value = None
     mock_db_instance.signin.return_value = None
-    # Patch the constants used in get_surrealdb_client to match the mock
+    # Patch the constants used in `get_surrealdb_client` to match the mock
     mocker.patch('src.nlp_processing.SURREALDB_USER', 'mock_user')
     mocker.patch('src.nlp_processing.SURREALDB_PASS', 'mock_pass')
     mocker.patch('src.nlp_processing.SURREALDB_NAMESPACE', 'mock_namespace')
@@ -204,7 +204,7 @@ def test_preprocess_text_with_custom_stopwords(mock_nlp_model):
     """
     # Temporarily add a custom stop word to the actual set used by the processor
     original_stopwords_len = len(nlp_processor.all_stopwords)
-    nlp_processor.all_stopwords.add('custom_stopword') # This is from settings.py example
+    nlp_processor.all_stopwords.add('custom_stopword') # This is from `settings.py` example
     text = "This is a custom_stopword about a very important test."
     processed = nlp_processor.preprocess_text(text)
     assert 'custom_stopword' not in processed
@@ -253,8 +253,8 @@ def test_analyze_sentiment_fallback_negative(mocker):
     Test sentiment analysis using the rule-based fallback for negative keywords.
     """
     # Temporarily set sentiment_analyzer to None to force fallback.
-    # Note: For this test, we are bypassing the mock_sentiment_analyzer fixture's default setup
-    # to specifically test the fallback path of the *original* analyze_sentiment function.
+    # Note: For this test, we are bypassing the `mock_sentiment_analyzer` fixture's default setup
+    # to specifically test the fallback path of the *original* `analyze_sentiment` function.
     mocker.patch.object(nlp_processor, 'sentiment_analyzer', None)
     label, score = nlp_processor.analyze_sentiment("There was a security breach discovered.")
     assert label == 'negative'
@@ -290,7 +290,7 @@ async def test_get_surrealdb_client_success(mock_surrealdb_client):
     mock_surrealdb_client.connect.assert_called_once()
     mock_surrealdb_client.signin.assert_called_once_with({"user": "mock_user", "pass": "mock_pass"})
     mock_surrealdb_client.use.assert_called_once_with("mock_namespace", "mock_db_name")
-    assert client == mock_surrealdb_client  # Ensure the returned client is our mock
+    assert client == mock_surrealdb_client # Ensure the returned client is our mock
 
 
 @pytest.mark.asyncio
@@ -323,7 +323,7 @@ def test_update_topic_model_initial(mock_gensim):
     )
     assert nlp_processor.lda_model is not None
     assert nlp_processor.dictionary is not None
-    assert nlp_processor.topic_keywords  # Should be populated by mock_gensim fixture's return for print_topics
+    assert nlp_processor.topic_keywords # Should be populated by `mock_gensim` fixture's return for print_topics
 
 
 def test_update_topic_model_update(mock_gensim):
@@ -370,7 +370,7 @@ def test_update_topic_model_empty_corpus(mock_gensim):
     """
     Test that the topic model is not updated with empty corpus data.
     """
-    # Ensure initial state is clean (lda_model and dictionary are None)
+    # Ensure initial state is clean (`lda_model` and `dictionary` are None)
     nlp_processor.lda_model = None
     nlp_processor.dictionary = None
 
@@ -502,13 +502,13 @@ async def test_process_communications_stream_success(
 
     # Verify topic model updates (buffer_size_for_update is 50 in original script)
     # With 3 messages, no update should occur yet as buffer_size_for_update is 50.
-    nlp_processor.lda_model.update.assert_not_called()  # No update because buffer not full
+    nlp_processor.lda_model.update.assert_not_called() # No update because buffer not full
 
     # Verify SurrealDB insertions (called once for each message)
     assert mock_surrealdb_client.query.call_count == 3
 
-    inserted_data_1 = mock_surrealdb_client.query.call_args_list[0][0]  # Get the first call's first arg (data)
-    assert isinstance(inserted_data_1[1]['data']['timestamp'], datetime)  # Ensure timestamp is a datetime object
+    inserted_data_1 = mock_surrealdb_client.query.call_args_list[0][0] # Get the first call's first arg (data)
+    assert isinstance(inserted_data_1[1]['data']['timestamp'], datetime) # Ensure timestamp is a datetime object
     assert isinstance(inserted_data_1[1]['data']['topics'], list) # Ensure topics is a list
 
     from datetime import timezone
@@ -531,7 +531,7 @@ async def test_process_communications_stream_success(
     assert any("Received message: Type='email'" in msg for msg in log_messages)
     assert any("Received message: Type='chat'" in msg for msg in log_messages)
     assert any("Received message: Type='doc'" in msg for msg in log_messages)
-    # The sentiment score from the mock analyze_sentiment function (via side_effect) is 0.95
+    # The sentiment score from the mock `analyze_sentiment` function (via `side_effect`) is `0.95`
     assert any(f"Sentiment: positive (0.95)" in msg for msg in log_messages)
     # Should NOT see "Updating topic model" if buffer not full
     assert not any("Updating topic model" in msg for msg in log_messages)
@@ -561,9 +561,9 @@ async def test_process_communications_stream_empty_content(
     assert "Skipping empty communication" in caplog.text
     # Ensure no NLP, sentiment, topic modeling, or DB ops for empty content
     mock_nlp_model.assert_not_called()
-    nlp_processor.analyze_sentiment.assert_not_called()  # This now works because analyze_sentiment is patched.
+    nlp_processor.analyze_sentiment.assert_not_called()
     mock_surrealdb_client.query.assert_not_called()
-    mock_surrealdb_client.close.assert_called_once()  # Client should still be closed
+    mock_surrealdb_client.close.assert_called_once() # Client should still be closed
 
 
 @pytest.mark.asyncio
@@ -575,17 +575,16 @@ async def test_process_communications_stream_db_connection_failure(
     The stream processing loop should not start.
     """
     mock_surrealdb_client.connect.side_effect = Exception("Failed to connect for test")
-    mock_kafka_consumer.__iter__.return_value = []  # No messages will be yielded
+    mock_kafka_consumer.__iter__.return_value = []
 
     with caplog.at_level(logging.ERROR):
         await nlp_processor.process_communications_stream()
 
     assert "Failed to connect to SurrealDB: Failed to connect for test" in caplog.text
     # Ensure the consumer loop is not even attempted if DB connection fails
-    # The __iter__ method of the consumer instance should be called once to get the empty iterator.
-    nlp_processor.KafkaConsumer.assert_called_once()  # Consumer class is instantiated
-    mock_kafka_consumer.__iter__.assert_not_called()  # But its iterator method is NOT called
-    mock_surrealdb_client.close.assert_not_called()  # No close if connection never established
+    nlp_processor.KafkaConsumer.assert_called_once() # Consumer class is instantiated
+    mock_kafka_consumer.__iter__.assert_not_called() # But its iterator method is NOT called
+    mock_surrealdb_client.close.assert_not_called() # No close if connection never established
 
 
 @pytest.mark.asyncio
@@ -646,23 +645,21 @@ async def test_process_communications_stream_no_timestamp(
         "source_id": "chat_no_ts",
         "content": "Content without a timestamp.",
         "timestamp": None,
-        "topics": [{"id": 0, "probability": 0.9}],  # Will be overwritten by processing
+        "topics": [{"id": 0, "probability": 0.9}]
     }
 
     mock_kafka_consumer.__iter__.return_value = [mock_kafka_consumer.MockMessage(mock_message_data)]
 
-    # Clear topic_over_time to ensure it's not populated
     nlp_processor.topic_over_time.clear()
 
     with caplog.at_level(logging.ERROR):
         await nlp_processor.process_communications_stream()
 
-    # Ensure processing steps occurred before the DB insertion attempt
     mock_nlp_model.assert_called_once()
-    assert nlp_processor.analyze_sentiment.call_count == 1  # This now works.
+    assert nlp_processor.analyze_sentiment.call_count == 1
     mock_surrealdb_client.query.assert_not_called()
 
-    # Crucially, topic_over_time should remain empty if timestamp is missing
+    # `topic_over_time` should remain empty if timestamp is missing
     assert not nlp_processor.topic_over_time
     mock_surrealdb_client.close.assert_called_once()
 
