@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inbox Dashboard</title>
+    <!-- Consider adding Bootstrap -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* Basic inline styles for quick demo. Move to static/css/style.css for production */
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; color: #333; }
+        .container { max-width: 1200px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1, h2 { color: #0056b3; text-align: center; margin-bottom: 20px; }
+        .plot-container { text-align: center; margin-bottom: 30px; }
+        .plot-container img { max-width: 100%; height: auto; border: 1px solid #ddd; border-radius: 5px; }
+        .message-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .message-table th, .message-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .message-table th { background-color: #007bff; color: white; }
+        .message-table tr:nth-child(even) { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Inbox Communications Dashboard</h1>
+
+        <div class="plot-container">
+            <h2>Topic Evolution Over Time</h2>
+            {% if topic_plot_url %}
+                <img src="{{ topic_plot_url }}" alt="Topic Evolution Plot">
+            {% else %}
+                <p>No data available for Topic Evolution.</p>
+            {% endif %}
+        </div>
+
+        <div class="plot-container">
+            <h2>Overall Sentiment Distribution</h2>
+            {% if sentiment_plot_url %}
+                <img src="{{ sentiment_plot_url }}" alt="Sentiment Distribution Plot">
+            {% else %}
+                <p>No data available for Sentiment Distribution.</p>
+            {% endif %}
+        </div>
+
+        <hr>
+
+        <h2>Recent Communications</h2>
+        {% if recent_messages %}
+        <table class="message-table">
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Source ID</th>
+                    <th>Type</th>
+                    <th>Sentiment</th>
+                    <th>Topics</th>
+                    <th>Content</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for message in recent_messages %}
+                <tr>
+                    <td>{{ message.display_time }}</td>
+                    <td>{{ message.source_id }}</td>
+                    <td>{{ message.type }}</td>
+                    <td>{{ message.sentiment }} ({{ '%.2f' % message.sentiment_score }})</td>
+                    <td>{{ message.topics_summary }}</td>
+                    <td>{{ message.display_content }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No recent messages to display.</p>
+        {% endif %}
+    </div>
+</body>
+</html>
